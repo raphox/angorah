@@ -1,0 +1,17 @@
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><%= link_to 'Users', users_path %></li>
+    <li class="is-active"><a href="#" aria-current="page">Edit</a></li>
+  </ul>
+</nav>
+
+<% content_for :actions do %>
+  <div class="control">
+    <%= link_to 'Show', @user, class: 'button is-link is-light' %>
+  </div>
+  <div class="control">
+    <%= link_to 'Back', users_path, class: 'button is-link' %>
+  </div>
+<% end %>
+
+<%= render 'form', user: @user %>

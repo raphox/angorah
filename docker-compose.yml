@@ -1,0 +1,32 @@
+version: '3'
+services:
+  database_mongodb:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./data/mongodb:/etc/mongo
+    ports:
+      - "27018:27017"
+
+  database_arangodb:
+    image: arangodb
+    environment:
+      ARANGO_NO_AUTH: 1
+    volumes:
+      - ./data/arangodb:/var/lib/arangodb3
+    ports:
+      - "8529:8529"
+
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/myapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database_mongodb
+      - database_arangodb
