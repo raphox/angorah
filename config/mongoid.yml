@@ -5,11 +5,11 @@ development:
     default:
       # Defines the name of the default database that Mongoid can connect to.
       # (required).
-      database: myapp_development
+      database: <%= ENV['MONGO_DATABASE'] %>
       # Provides the hosts the default client can connect to. Must be an array
       # of host:port pairs. (required)
       hosts:
-        - database_mongodb:27017
+        - <%= ENV['MONGO_SERVER'] %>:<%= ENV['MONGO_PORT'] %>
       options:
         # Note that all options listed below are Ruby driver client options (the mongo gem).
         # Please refer to the driver documentation of the version of the mongo gem you are using
@@ -28,10 +28,10 @@ development:
         #     - use: web
 
         # The name of the user for authentication.
-        user: 'root'
+        user: <%= ENV['MONGO_USER'] %>
 
         # The password of the user for authentication.
-        password: 'password'
+        password: <%= ENV['MONGO_PASSWORD'] %>
 
         # The user's database roles.
         # roles:
@@ -155,10 +155,10 @@ development:
 test:
   clients:
     default:
-      database: myapp_test
+      database: <%= ENV['MONGO_DATABASE'] %>_test
       hosts:
-        - database_mongodb:27017
+        - <%= ENV['MONGO_SERVER'] %>:<%= ENV['MONGO_PORT'] %>
       options:
-        read:
-          mode: :primary
-        max_pool_size: 1
+        user: <%= ENV['MONGO_USER'] %>
+        password: <%= ENV['MONGO_PASSWORD'] %>
+        auth_source: admin

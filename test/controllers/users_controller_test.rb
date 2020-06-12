@@ -2,7 +2,14 @@ require 'test_helper'
 
 class UsersControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @user = users(:one)
+    stub_request(:get, /.*/).
+      to_return({
+        status: 200,
+        body: "<h1>Title h1</h1><h2>Title h2 A</h2><h2>Title h2 B</h2>",
+        headers: { "Content-Type"=> "text/html" }
+      })
+
+    @user = create(:user)
   end
 
   test "should get index" do
@@ -17,7 +24,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   test "should create user" do
     assert_difference('User.count') do
-      post users_url, params: { user: { name: @user.name, website: @user.website, website_data_collection: @user.website_data_collection } }
+      post users_url, params: { user: build(:user).attributes }
     end
 
     assert_redirected_to user_url(User.last)
@@ -34,7 +41,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update user" do
-    patch user_url(@user), params: { user: { name: @user.name, website: @user.website, website_data_collection: @user.website_data_collection } }
+    patch user_url(@user), params: { user: build(:user).attributes }
+    @user.reload
     assert_redirected_to user_url(@user)
   end
 

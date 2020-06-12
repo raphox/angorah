@@ -11,17 +11,42 @@ services:
     ports:
       - "27018:27017"
 
-  database_arangodb:
-    image: arangodb
+  # database_arangodb:
+  #   image: arangodb
+  #   environment:
+  #     ARANGO_NO_AUTH: 1
+  #   volumes:
+  #     - ./data/arangodb:/var/lib/arangodb3
+  #   ports:
+  #     - "8529:8529"
+
+  database_neo4j:
+    image: neo4j:3.5
     environment:
-      ARANGO_NO_AUTH: 1
+      NEO4J_dbms_security_auth__enabled: 'false'
+      NEO4J_dbms_default__listen__address: 0.0.0.0
+      NEO4J_dbms_default__advertised__address: 0.0.0.0
     volumes:
-      - ./data/arangodb:/var/lib/arangodb3
+      - ./data/neo4j:/data
     ports:
-      - "8529:8529"
+      - "7474:7474"
+      - "7687:7687"
 
   web:
     build: .
+    environment:
+      MONGO_SERVER: database_mongodb
+      MONGO_PORT: 27017
+      MONGO_DATABASE: myapp_development
+      MONGO_USER: user
+      MONGO_PASSWORD: password
+
+      ARANGO_SERVER: database_arangodb
+      ARANGO_DATABASE: angora_development
+      ARANGO_USER: ""
+      ARANGO_PASSWORD: ""
+
+      NEO4J_URL: http://database_neo4j:7474
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     volumes:
       - .:/myapp
@@ -29,4 +54,5 @@ services:
       - "3000:3000"
     depends_on:
       - database_mongodb
-      - database_arangodb
+      # - database_arangodb
+      - database_neo4j

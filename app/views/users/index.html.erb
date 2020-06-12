@@ -1,4 +1,10 @@
-<p id="notice"><%= notice %></p>
+<% if notice.present? %>
+  <article class="message is-info">
+    <div class="message-body">
+      <%= notice %>
+    </div>
+  </article>
+<% end %>
 
 <nav class="breadcrumb" aria-label="breadcrumbs">
   <ul>
@@ -10,7 +16,7 @@
   <% @users.each do |user| %>
     <div class="column is-full-mobile is-one-third-tablet is-one-quarter-widescreen">
       <div class="card bm--card-equal-height">
-        <%= link_to(user) do %>
+        <%= link_to(user_path(user)) do %>
           <div class="card-content">
             <div class="media">
               <div class="media-left">
@@ -19,21 +25,25 @@
                 </figure>
               </div>
               <div class="media-content">
-                <p class="title is-4"><%= user.name %></p>
-                <p class="subtitle is-6">@<%= user.name %></p>
+                <p class="title is-4"><%= user.full_name %></p>
+                <p class="subtitle is-6">@<%= user.slug %></p>
               </div>
             </div>
 
             <div class="content">
-              <%= user.website_data_collection %>
-              <br>
-              <time datetime="<%= user.created_at %>"><%= user.created_at %></time>
+              <p><%= user.introduction %></p>
+              <p class="has-text-right is-size-6">
+                <time datetime="<%= user.created_at %>">Created at <%= l(user.created_at, format: :short) %></time>
+              </p>
             </div>
           </div>
         <% end %>
         <footer class="card-footer">
           <%= link_to 'Edit', edit_user_path(user), class: 'card-footer-item' %>
-          <%= link_to 'Destroy', user, method: :delete, class: 'card-footer-item', data: { confirm: 'Are you sure?' } %>
+          <%= link_to 'Destroy', user_path(user), method: :delete, class: 'card-footer-item', data: { confirm: 'Are you sure?' } %>
+          <%= link_to invite_user_path(user), class: 'card-footer-item btn-invite' do %>
+            <div class="heart"></div> Invite
+          <% end %>
         </footer>
       </div>
     </div>
@@ -43,3 +53,17 @@
 <p class="has-text-right">
   <%= link_to 'New User', new_user_path, class: 'button is-link' %>
 </p>
+
+<script type="text/javascript">
+  var els = document.querySelectorAll('.btn-invite');
+
+  for (const el of els) {
+    el.addEventListener('click', function (event) {
+      event.preventDefault();
+
+      el.querySelector('.heart').classList.toggle('is-active');
+      // TOOD: Use ajax
+      setTimeout(function() { document.location.href = el.href }, 900);
+    });
+  }
+</script>

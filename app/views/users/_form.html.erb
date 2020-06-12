@@ -1,4 +1,4 @@
-<%= form_with(model: user, local: true) do |form| %>
+<%= form_with(model: user, scope: 'user', url: user.persisted? ? user_path(user) : users_path, local: true) do |form| %>
   <% if user.errors.any? %>
     <article class="message is-danger">
       <div class="message-body">
@@ -14,13 +14,23 @@
   <% end %>
 
   <div class="field">
-    <%= form.label :name, class: 'label' %>
-    <%= form.text_field :name, class: 'input' %>
+    <%= form.label :first_name, class: 'label' %>
+    <%= form.text_field :first_name, class: 'input' %>
+  </div>
+
+  <div class="field">
+    <%= form.label :last_name, class: 'label' %>
+    <%= form.text_field :last_name, class: 'input' %>
   </div>
 
   <div class="field">
     <%= form.label :website, class: 'label' %>
-    <%= form.text_field :website, class: 'input' %>
+    <%= form.url_field :website, class: 'input' %>
+  </div>
+
+  <div class="field">
+    <%= form.label :introduction, class: 'label' %>
+    <%= form.text_area :introduction, class: 'textarea', rows: 10 %>
   </div>
 
   <div class="field is-grouped">

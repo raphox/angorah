@@ -33,3 +33,4 @@ yarn-debug.log*
 .yarn-integrity
 
 /data/*
+/db/neo4j/development

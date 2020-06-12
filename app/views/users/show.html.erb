@@ -5,7 +5,13 @@
   </ul>
 </nav>
 
-<p id="notice"><%= notice %></p>
+<% if notice.present? %>
+  <article class="message is-info">
+    <div class="message-body">
+      <%= notice %>
+    </div>
+  </article>
+<% end %>
 
 <div class="box">
   <article class="media">
@@ -17,10 +23,16 @@
     <div class="media-content">
       <div class="content">
         <p>
-          <strong><%= @user.name %></strong> <small>@<%= @user.name %></small> <small><%= @user.created_at %></small>
+          <strong><%= @user.full_name %></strong> <small>@<%= @user.first_name %></small> <small><%= @user.created_at %></small>
           <br>
-          <%= @user.website_data_collection %>
-          <%= @user.shortest_path_to('session_user') %>
+          <%= @user.introduction %><br />
+          <% if @user.references.present?  %>
+            <ul>
+              <% @user.references.each do |item| %>
+                <li><%= item %></li>
+              <% end %>
+            </ul>
+          <% end %>
         </p>
       </div>
       <nav class="level is-mobile">
