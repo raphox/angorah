@@ -18,10 +18,11 @@ class User
   slug :first_name, reserve: ['admin', 'root'] + RouteRecognizer.initial_path_segments
 
   validates :first_name, presence: true
-  validates :website, uniqueness: true, presence: true, website: true
+  validates :website, uniqueness: true, presence: true, website: true, unless: :skip_get_website_titles
 
   after_save :get_website_titles, unless: :skip_get_website_titles
   after_save :sync_neoj4
+  after_create :clear_database
   before_destroy :destroy_neoj4
 
   def full_name
@@ -46,27 +47,56 @@ class User
   end
 
   def sync_neoj4
-    return unless changed_attributes.present?
+    return unless (changed_attributes.keys - ['updated_at']).any?
 
-    params = attributes.slice(
-      :first_name,
-      :last_name,
-      :website,
-      :titles,
-      :subtitles,
-      :introduction
-    )
+    params = attributes.slice(*%w[
+      first_name
+      last_name
+      website
+      titles
+      subtitles
+      introduction
+    ]).merge({ 'skip_get_website_titles' => true })
 
     if neo4j_uuid.present?
       user = UserNeo4j.find(neo4j_uuid)
       user.update(params)
     else
       user = UserNeo4j.create(params)
-      update({ neo4j_uuid: user.uuid })
+      set({ neo4j_uuid: user.uuid })
     end
   end
 
   def destroy_neoj4
-    UserNeo4j.find(neo4j_uuid).destroy
+    return unless neo4j_uuid.present?
+
+    UserNeo4j.find(neo4j_uuid).destroy rescue nil
+
+    update({ neo4j_uuid: nil })
   end
+
+  # preventing misuse of the application in an open environment
+  def clear_database
+    return if User.count <= 25
+
+    User.destroy_all
+
+    User::DEFAULT_USERS.each do |attributes|
+      User.create(attributes)
+    end
+  end
+
+  # Used as default user list on start project
+  DEFAULT_USERS = [
+    { first_name: 'Vinnie', last_name: 'Lintott', website: 'http://indiatimes.com', titles: [''], skip_get_website_titles: true },
+    { first_name: 'Otha', last_name: 'Kunes', website: 'https://edublogs.org', titles: ['.NET'], skip_get_website_titles: true },
+    { first_name: 'Dayle', last_name: 'Caswill', website: 'http://sohu.com', titles: ['C', 'C++'], skip_get_website_titles: true },
+    { first_name: 'Erastus', last_name: 'Quilligan', website: 'http://skyrock.com', titles: ['Javascript', 'ASP'], skip_get_website_titles: true },
+    { first_name: 'Jamal', last_name: 'Cullington', website: 'https://webmd.com', titles: ['Pascal'], skip_get_website_titles: true },
+    { first_name: 'Joice', last_name: 'Brooke', website: 'http://marketwatch.com', titles: ['Python'], skip_get_website_titles: true },
+    { first_name: 'Gwenni', last_name: 'Dines', website: 'http://typepad.com', titles: ['Go'], skip_get_website_titles: true },
+    { first_name: 'Glyn', last_name: 'Clouter', website: 'https://google.ru', titles: ['PHP', 'Ruby'], skip_get_website_titles: true },
+    { first_name: 'Lucienne', last_name: 'Ready', website: 'http://myspace.com', titles: ['Ruby'], skip_get_website_titles: true },
+    { first_name: 'Katuscha', last_name: 'Tinman', website: 'http://umn.edu', titles: ['Java'], skip_get_website_titles: true },
+  ]
 end

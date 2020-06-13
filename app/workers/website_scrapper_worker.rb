@@ -4,8 +4,8 @@ require 'website_scrapper'
 class WebsiteScrapperWorker
   def perform(user_id, klass = User)
     user = klass.find(user_id)
-    titles = WebsiteScrapper.titles(user.website)
+    attributes = WebsiteScrapper.titles(user.website)
 
-    user.update!(titles.merge({ skip_get_website_titles: true }))
+    user.update!(attributes.merge({ skip_get_website_titles: true }))
   end
 end

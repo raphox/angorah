@@ -1,0 +1,23 @@
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="container">
+    <div id="navbarBasicExample" class="navbar-menu">
+      <div class="navbar-start">
+        <%= link_to root_path, class: "navbar-item" do %>
+          <b>Angorah</b>
+        <% end %>
+      </div>
+
+      <div class="navbar-end">
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">
+            I'm &nbsp;<b><%= user_name %></b>
+          </a>
+
+          <div class="navbar-dropdown">
+            <%= users_links %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

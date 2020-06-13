@@ -12,6 +12,33 @@ class UsersController < ApplicationController
   # GET /users/1
   # GET /users/1.json
   def show
+    @user_neo4j = UserNeo4j.find(@user.neo4j_uuid)
+    @friends_path = {}
+
+    # TODO: optimize queries to locate Users
+    @friends =
+      if params[:q].present?
+        uuids = @user_neo4j.
+          friends(:l, :r, rel_length: 5).
+          where("ANY(title IN l.titles WHERE toLower(title) CONTAINS toLower({title}))").
+          params({ title: params[:q] }).
+          pluck(:uuid)
+
+        uuids.each do |uuid|
+          @friends_path[uuid] = Neo4j::ActiveBase.current_session.
+            query("MATCH (r:UserNeo4j { uuid: '#{@user.neo4j_uuid}' }),
+              (l:UserNeo4j { uuid: '#{uuid}' }),
+              p = shortestPath((r)-[FRIEND*..15]->(l))
+              RETURN p", limit: 1).first.p.nodes.
+            map { |node| User.find_by({ neo4j_uuid: node.properties[:uuid] }) }
+        end
+
+        User.where(:neo4j_uuid.in => uuids)
+      else
+        uuids = @user_neo4j.friends.pluck(:uuid)
+
+        User.where(:neo4j_uuid.in => uuids)
+      end
   end
 
   # GET /users/new
@@ -54,14 +81,22 @@ class UsersController < ApplicationController
   end
 
   def invite
-    friend_a = UserNeo4j.first # TODO: Use session user
+    notice = 'User was successfully invited.'
+    friend_a = UserNeo4j.find(@current_user.neo4j_uuid)
     friend_b = UserNeo4j.find(@user.neo4j_uuid)
 
-    friend_a.friends << friend_b if friend_a != friend_b
+    if friend_a.friends(rel_length: 1).where({ uuid: @user.neo4j_uuid }).present?
+      notice = 'User was successfully uninvited.'
+      friend_a.friends.delete(friend_b)
+      friend_b.friends.delete(friend_a)
+    else
+      friend_a.friends << friend_b
+      friend_b.friends << friend_a
+    end
 
     respond_to do |format|
-      format.html { redirect_to user_path(@user), notice: 'User was successfully invited.' }
-      format.json { render json: { status: :ok, message: 'User was successfully invited.' } }
+      format.html { redirect_to user_path(@user), notice: notice }
+      format.json { render json: { status: :ok, message: notice } }
     end
   end
 

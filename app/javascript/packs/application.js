@@ -14,3 +14,26 @@ require("channels")
 //
 // const images = require.context('../images', true)
 // const imagePath = (name) => images(name, true)
+
+handdlerHearts = function handdlerHearts() {
+  var els = document.querySelectorAll('.btn-invite');
+
+  for (const el of els) {
+    el.addEventListener('click', function (event) {
+      event.preventDefault();
+
+      el.classList.toggle('is-active');
+      // TOOD: Use ajax
+      setTimeout(function() { document.location.href = el.href }, 450);
+    });
+  }
+}
+
+
+document.addEventListener("DOMContentLoaded", function() {
+  handdlerHearts();
+});
+
+document.addEventListener("turbolinks:load", function() {
+  handdlerHearts();
+});

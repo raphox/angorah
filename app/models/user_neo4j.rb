@@ -17,7 +17,7 @@ class UserNeo4j
 
   attr_accessor :skip_get_website_titles
 
-  has_many :out, :friends, type: :FRIEND, model_class: self, labels: false, unique: true
+  has_many :both, :friends, type: :FRIEND, model_class: self, labels: false, unique: true
 
   validates :slug, exclusion: { in: ['admin', 'root'] + RouteRecognizer.initial_path_segments }, uniqueness: true
   validates :first_name, presence: true
@@ -25,10 +25,10 @@ class UserNeo4j
 
   before_validation :set_slug
 
-  after_save :get_website_titles, unless: :skip_get_website_titles
+  after_save :get_website_titles
 
   def set_slug
-    slug = first_name.parameterize
+    slug = first_name&.parameterize if slug.blank? || slug_changed?
   end
 
   def full_name
@@ -47,7 +47,9 @@ class UserNeo4j
   protected
 
   def get_website_titles
-    # The below line not working for now
+    return if skip_get_website_titles
+
+    # The below line not working for now https://github.com/neo4jrb/activegraph/issues/1351
     # return unless changed_attributes.keys.include?('website')
 
     reload_titles!

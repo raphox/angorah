@@ -6,53 +6,23 @@
   </article>
 <% end %>
 
+<p class="has-text-right is-pulled-right">
+  <%= link_to 'New User', new_user_path, class: 'button is-link' %>
+</p>
+
 <nav class="breadcrumb" aria-label="breadcrumbs">
   <ul>
     <li class="is-active"><a href="#" aria-current="page">Users</a></li>
   </ul>
 </nav>
 
+<div class="is-clearfix mb-6">&nbsp;</div>
+
 <div class="columns is-multiline">
   <% @users.each do |user| %>
-    <div class="column is-full-mobile is-one-third-tablet is-one-quarter-widescreen">
-      <div class="card bm--card-equal-height">
-        <%= link_to(user_path(user)) do %>
-          <div class="card-content">
-            <div class="media">
-              <div class="media-left">
-                <figure class="image is-48x48">
-                  <img src="https://bulma.io/images/placeholders/96x96.png" alt="Placeholder image">
-                </figure>
-              </div>
-              <div class="media-content">
-                <p class="title is-4"><%= user.full_name %></p>
-                <p class="subtitle is-6">@<%= user.slug %></p>
-              </div>
-            </div>
-
-            <div class="content">
-              <p><%= user.introduction %></p>
-              <p class="has-text-right is-size-6">
-                <time datetime="<%= user.created_at %>">Created at <%= l(user.created_at, format: :short) %></time>
-              </p>
-            </div>
-          </div>
-        <% end %>
-        <footer class="card-footer">
-          <%= link_to 'Edit', edit_user_path(user), class: 'card-footer-item' %>
-          <%= link_to 'Destroy', user_path(user), method: :delete, class: 'card-footer-item', data: { confirm: 'Are you sure?' } %>
-          <%= link_to invite_user_path(user), class: 'card-footer-item btn-invite' do %>
-            <div class="heart"></div> Invite
-          <% end %>
-        </footer>
-      </div>
-    </div>
+    <%= render partial: 'user', locals: { user: user } %>
   <% end %>
 </div>
-
-<p class="has-text-right">
-  <%= link_to 'New User', new_user_path, class: 'button is-link' %>
-</p>
 
 <script type="text/javascript">
   var els = document.querySelectorAll('.btn-invite');

@@ -22,3 +22,21 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+## Neo4j
+
+### Removing data
+
+Removing nodes:
+
+```
+MATCH (n { first_name: 'Raphael' })
+DETACH DELETE n
+```
+
+Removing relations:
+
+```
+MATCH (Raphael)-[r:FRIEND]->(It)
+DELETE r
+```

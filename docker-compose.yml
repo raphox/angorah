@@ -27,7 +27,9 @@ services:
       NEO4J_dbms_default__listen__address: 0.0.0.0
       NEO4J_dbms_default__advertised__address: 0.0.0.0
     volumes:
-      - ./data/neo4j:/data
+      - ./data/neo4j/data:/data
+      - ./data/neo4j/logs:/logs
+      - ./data/neo4j/conf:/conf
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -48,6 +50,8 @@ services:
 
       NEO4J_URL: http://database_neo4j:7474
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    stdin_open: true
+    tty: true
     volumes:
       - .:/myapp
     ports:

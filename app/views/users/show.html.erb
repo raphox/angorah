@@ -1,7 +1,16 @@
+<div class="field is-grouped is-pulled-right">
+  <div class="control">
+    <%= link_to 'Edit', edit_user_path(@user), class: 'button is-link is-light' %>
+  </div>
+  <div class="control">
+    <%= link_to 'Back', users_path, class: 'button is-link' %>
+  </div>
+</div>
+
 <nav class="breadcrumb" aria-label="breadcrumbs">
   <ul>
     <li><%= link_to 'Users', users_path %></li>
-    <li class="is-active"><a href="#" aria-current="page">Show</a></li>
+    <li class="is-active"><a href="#" aria-current="page"><%= @user.full_name %></a></li>
   </ul>
 </nav>
 
@@ -49,11 +58,29 @@
   </article>
 </div>
 
-<div class="field is-grouped">
-  <div class="control">
-    <%= link_to 'Edit', edit_user_path(@user), class: 'button is-link is-light' %>
+<div class="columns">
+  <div class="column is-two-thirds ">
+    <h2 class="title is-2">Friends</h2>
   </div>
-  <div class="control">
-    <%= link_to 'Back', users_path, class: 'button is-link' %>
+  <div class="column">
+    <form>
+      <div class="field has-addons is-pulled-right">
+        <div class="control">
+          <%= text_field_tag 'q', nil, placeholder: 'Enter search term...', value: params[:q], class: 'input' %>
+        </div>
+        <div class="control">
+          <button type="submit" class="button is-link">
+            Search
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
+</div>
+
+
+<div class="columns is-multiline">
+  <% @friends.each do |item| %>
+    <%= render partial: 'user', locals: { user: item, path: @friends_path[item.neo4j_uuid] } %>
+  <% end %>
 </div>
