@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   resources :users do
     get 'invite', on: :member, as: :invite
+    get 'friends', on: :member, as: :friends
   end
 
   get '/:id', to: 'users#show'

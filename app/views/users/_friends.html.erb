@@ -1,0 +1,59 @@
+<div class="columns">
+  <div class="column is-two-thirds ">
+    <h2 class="title is-2">Friends</h2>
+  </div>
+  <div class="column">
+    <form name="search">
+      <div class="field has-addons is-pulled-right">
+        <div class="control">
+          <%= text_field_tag 'q', nil, placeholder: 'Enter search term...', value: params[:q], class: 'input' %>
+        </div>
+        <div class="control">
+          <button type="submit" class="button is-link">
+            Search
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<% if @friends.present? %>
+  <div class="columns is-multiline">
+    <% @friends.each do |item| %>
+      <%= render partial: 'user', locals: { user: item, path: @friends_path[item.uuid] } %>
+    <% end %>
+  </div>
+<% else %>
+  <p><%= params[:q].present? ? 'No results.' : 'Nothing here.' %></p>
+<% end %>
+
+<script type="text/javascript">
+  $(function () {
+    var form = $("#friend-list form");
+    var el = form.find("input[name='q']");
+    var button = form.find("button[type='submit']");
+
+    form.submit(function (event) {
+      event.preventDefault();
+
+      button.prop('disabled', true).text('Searching...');
+
+      $.ajax({
+          method: "GET",
+          url: '<%= friends_user_path(@user) %>',
+          data: { q: el.val() },
+        })
+        .done(function (data) {
+          $("#friend-list").html(data);
+        })
+        .fail(function () {
+          alert("error");
+        })
+        .always(function () {
+          button.prop('disabled', false);
+        })
+      ;
+    })
+  });
+</script>

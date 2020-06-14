@@ -6,7 +6,7 @@
 require("@rails/ujs").start()
 require("turbolinks").start()
 require("channels")
-
+global.$ = require('jquery')
 
 // Uncomment to copy all static images under ../images to the output folder and reference
 // them with the image_pack_tag helper in views (e.g <%= image_pack_tag 'rails.png' %>)
@@ -15,25 +15,19 @@ require("channels")
 // const images = require.context('../images', true)
 // const imagePath = (name) => images(name, true)
 
-handdlerHearts = function handdlerHearts() {
-  var els = document.querySelectorAll('.btn-invite');
+$(document).on('ready turbolinks:load', function () {
+  $('.btn-invite').click(function (event) {
+    event.preventDefault();
 
-  for (const el of els) {
-    el.addEventListener('click', function (event) {
-      event.preventDefault();
+    var el = $(this);
 
-      el.classList.toggle('is-active');
-      // TOOD: Use ajax
-      setTimeout(function() { document.location.href = el.href }, 450);
-    });
-  }
-}
-
-
-document.addEventListener("DOMContentLoaded", function() {
-  handdlerHearts();
-});
-
-document.addEventListener("turbolinks:load", function() {
-  handdlerHearts();
+    $.get(el.attr('href'))
+      .done(function(data) {
+        el.toggleClass('is-active');
+      })
+      .fail(function() {
+        alert("error");
+      })
+    ;
+  })
 });

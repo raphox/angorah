@@ -12,6 +12,7 @@ module UserSync
     params = attributes.slice(*%w[
       first_name
       last_name
+      slug
       website
       titles
       subtitles
@@ -34,6 +35,6 @@ module UserSync
 
     UserNeo4j.find(neo4j_uuid).destroy rescue nil
 
-    update({ neo4j_uuid: nil })
+    set({ neo4j_uuid: nil })
   end
 end

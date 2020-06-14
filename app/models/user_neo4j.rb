@@ -17,7 +17,7 @@ class UserNeo4j
 
   attr_accessor :skip_get_website_titles
 
-  has_many :both, :friends, type: :FRIEND, model_class: self, labels: false, unique: true
+  has_many :out, :friends, type: :FRIEND, model_class: self, labels: false, unique: true
 
   validates :slug, exclusion: { in: ['admin', 'root'] + RouteRecognizer.initial_path_segments }, uniqueness: true
   validates :first_name, presence: true
@@ -40,37 +40,30 @@ class UserNeo4j
   end
 
   def reload_titles!
+    return unless persisted?
+
     # TODO: Use async_perform with Sidekiq
     WebsiteScrapperWorker.new.perform(uuid, self.class)
   end
 
   def friendsBySearch(term)
-    byebug
     friends_path = {}
-    uuids = friends(:l, :r, rel_length: { max: 5 }).
-      where("ANY(title IN l.titles WHERE toLower(title) CONTAINS toLower({title}))").
-      params({ title: term }).
-      pluck(:uuid)
 
-    uuids.each do |uuid|
+    friends = as(:user).friends(:l, :r, rel_length: { max: 5 }).
+      where('ANY(title IN l.titles WHERE toLower(title) CONTAINS toLower({title})) OR
+        ANY(subtitle IN l.subtitles WHERE toLower(subtitle) CONTAINS toLower({title}))').
+      where('l <> user').
+      params({ title: term })
+
+    friends.each do |friend|
       friends_path[uuid] = Neo4j::ActiveBase.current_session.
         query("MATCH (r:UserNeo4j { uuid: '#{self.uuid}' }),
-          (l:UserNeo4j { uuid: '#{uuid}' }),
+          (l:UserNeo4j { uuid: '#{friend.uuid}' }),
           p = shortestPath((r)-[FRIEND*..5]->(l))
-          RETURN p", limit: 1).first.p.nodes.
-        map { |node| User.find_by({ neo4j_uuid: node.properties[:uuid] }) }
+          RETURN p", limit: 1).first.p.nodes
     end
 
-    return uuids, friends_path
-
-    # FIXME: May it works
-    # as(:user).
-    #   friends(:friends).
-    #   query.
-    #   with('shortestPath((user)-[:FRIEND*..5]->(friends)) AS shortest_path').
-    #   where("ANY(title IN friends.titles WHERE toLower(title) CONTAINS toLower({title}))").
-    #   params({ title: term }).
-    #   pluck(:shortest_path)
+    return friends, friends_path
   end
 
   protected

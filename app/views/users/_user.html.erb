@@ -21,7 +21,7 @@
           <%= friends_path(path) if defined? path %>
         </p>
         <p class="has-text-right is-size-6 mt-6">
-          <time datetime="<%= user.created_at %>">Created at <%= l(user.created_at, format: :short) %></time>
+          <time class="is-italic has-text-grey-light" datetime="<%= user.created_at %>">Created at <%= l(user.created_at, format: :short) %></time>
         </p>
       </div>
     </div>

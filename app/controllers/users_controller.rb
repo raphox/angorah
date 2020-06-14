@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   ACTIVE_MODEL_CLASS = User # UserNeo4j
 
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :invite]
+  before_action :set_user, only: [:show, :friends, :edit, :update, :destroy, :invite]
 
   # GET /users
   # GET /users.json
@@ -12,19 +12,24 @@ class UsersController < ApplicationController
   # GET /users/1
   # GET /users/1.json
   def show
-    @user_neo4j = UserNeo4j.find(@user.neo4j_uuid) if @user.neo4j_uuid.present?
+    @user_neo4j = UserNeo4j.find(@user.neo4j_uuid)
     @friends_path = {}
 
-    # TODO: optimize queries to locate Users
-    @friends = begin
-      if params[:q].present?
-        byebug
-        uuids = @user_neo4j.friendsBySearch(params[:q]).pluck(:uuid)
-      elsif @user_neo4j.present?
-        uuids = @user_neo4j.friends.pluck(:uuid)
-      end
+    if params[:q].present?
+      @friends, @friends_path = @user_neo4j.friendsBySearch(params[:q])
+    elsif @user_neo4j.present?
+      @friends = @user_neo4j.friends
+    end
+  end
 
-      uuids.present? ? User.where(:neo4j_uuid.in => uuids) : []
+  # GET /users/1/friends
+  # GET /users/1/friends.json
+  def friends
+    show # load data
+
+    respond_to do |format|
+      format.html { render partial: 'friends' }
+      format.json { render json: { status: :ok, message: notice } }
     end
   end
 
@@ -67,6 +72,8 @@ class UsersController < ApplicationController
     end
   end
 
+  # GET /users/1/invite
+  # GET /users/1/invite.json
   def invite
     notice = 'User was successfully invited.'
     friend_a = UserNeo4j.find(@current_user.neo4j_uuid)

@@ -34,6 +34,8 @@ class User
   end
 
   def reload_titles!
+    return unless persisted?
+
     # TODO: Use async_perform with Sidekiq
     WebsiteScrapperWorker.new.perform(id)
   end
