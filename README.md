@@ -23,6 +23,20 @@ Things you may want to cover:
 
 * ...
 
+## Debugging with `byebug`
+
+## Docker compos config
+
+```yaml
+app:
+  tty: true
+  stdin_open: true
+```
+
+This also makes it possible to after the containers are up do docker attach project_app_1 which seems to work fine.
+
+https://github.com/docker/compose/issues/423#issuecomment-141995398
+
 ## Neo4j
 
 ### Removing data

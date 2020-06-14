@@ -6,6 +6,8 @@ module UsersHelper
     link_to invite_user_path(user), class: "card-footer-item btn-invite #{'is-active' if invited}" do
       content_tag(:div, nil, class: 'heart') + ' Invite'
     end
+  rescue
+    nil
   end
 
   def friends_path(path)

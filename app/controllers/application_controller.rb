@@ -8,6 +8,6 @@ class ApplicationController < ActionController::Base
 
     @current_user = User.first if @current_user.nil?
 
-    session[:session_user_id] = @current_user.id.to_s
+    session[:session_user_id] = @current_user&.id&.to_s
   end
 end

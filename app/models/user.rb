@@ -5,6 +5,8 @@ class User
   include Mongoid::Timestamps
   include Mongoid::Slug
 
+  include UserSync
+
   field :first_name, type: String
   field :last_name, type: String
   field :website, type: String
@@ -21,9 +23,7 @@ class User
   validates :website, uniqueness: true, presence: true, website: true, unless: :skip_get_website_titles
 
   after_save :get_website_titles, unless: :skip_get_website_titles
-  after_save :sync_neoj4
   after_create :clear_database
-  before_destroy :destroy_neoj4
 
   def full_name
     [first_name, last_name].join(' ')
@@ -44,35 +44,6 @@ class User
     return unless changed_attributes.keys.include?('website')
 
     reload_titles!
-  end
-
-  def sync_neoj4
-    return unless (changed_attributes.keys - ['updated_at']).any?
-
-    params = attributes.slice(*%w[
-      first_name
-      last_name
-      website
-      titles
-      subtitles
-      introduction
-    ]).merge({ 'skip_get_website_titles' => true })
-
-    if neo4j_uuid.present?
-      user = UserNeo4j.find(neo4j_uuid)
-      user.update(params)
-    else
-      user = UserNeo4j.create(params)
-      set({ neo4j_uuid: user.uuid })
-    end
-  end
-
-  def destroy_neoj4
-    return unless neo4j_uuid.present?
-
-    UserNeo4j.find(neo4j_uuid).destroy rescue nil
-
-    update({ neo4j_uuid: nil })
   end
 
   # preventing misuse of the application in an open environment

@@ -34,7 +34,7 @@ module Myapp
 
     config.autoload_paths += %W(#{config.root}/app/workers)
 
-    config.neo4j.session.type = :bolt
+    config.neo4j.session.type = ENV['NEO4J_TYPE']
     config.neo4j.session.url = ENV['NEO4J_URL']
 
     config.generators { |g| g.orm :neo4j }

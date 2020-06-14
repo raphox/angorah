@@ -78,9 +78,12 @@
   </div>
 </div>
 
-
-<div class="columns is-multiline">
-  <% @friends.each do |item| %>
-    <%= render partial: 'user', locals: { user: item, path: @friends_path[item.neo4j_uuid] } %>
-  <% end %>
-</div>
+<% if @friends.present? %>
+  <div class="columns is-multiline">
+    <% @friends.each do |item| %>
+      <%= render partial: 'user', locals: { user: item, path: @friends_path[item.neo4j_uuid] } %>
+    <% end %>
+  </div>
+<% else %>
+  <p><%= params[:q].present? ? 'No results.' : 'Nothing here.' %></p>
+<% end %>

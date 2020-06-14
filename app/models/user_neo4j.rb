@@ -44,6 +44,35 @@ class UserNeo4j
     WebsiteScrapperWorker.new.perform(uuid, self.class)
   end
 
+  def friendsBySearch(term)
+    byebug
+    friends_path = {}
+    uuids = friends(:l, :r, rel_length: { max: 5 }).
+      where("ANY(title IN l.titles WHERE toLower(title) CONTAINS toLower({title}))").
+      params({ title: term }).
+      pluck(:uuid)
+
+    uuids.each do |uuid|
+      friends_path[uuid] = Neo4j::ActiveBase.current_session.
+        query("MATCH (r:UserNeo4j { uuid: '#{self.uuid}' }),
+          (l:UserNeo4j { uuid: '#{uuid}' }),
+          p = shortestPath((r)-[FRIEND*..5]->(l))
+          RETURN p", limit: 1).first.p.nodes.
+        map { |node| User.find_by({ neo4j_uuid: node.properties[:uuid] }) }
+    end
+
+    return uuids, friends_path
+
+    # FIXME: May it works
+    # as(:user).
+    #   friends(:friends).
+    #   query.
+    #   with('shortestPath((user)-[:FRIEND*..5]->(friends)) AS shortest_path').
+    #   where("ANY(title IN friends.titles WHERE toLower(title) CONTAINS toLower({title}))").
+    #   params({ title: term }).
+    #   pluck(:shortest_path)
+  end
+
   protected
 
   def get_website_titles

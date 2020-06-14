@@ -13,3 +13,19 @@ production:
        # We recommend 15 because it allows for plenty of time
        # in most operating environments.
        connect_timeout: 15
+
+development:
+  clients:
+    default:
+     uri: <%= ENV['MONGODB_URI'] %>
+     options:
+       connect_timeout: 15
+       auth_source: admin
+
+test:
+  clients:
+    default:
+     uri: <%= ENV['MONGODB_TEST_URI'] %>
+     options:
+       connect_timeout: 15
+       auth_source: admin

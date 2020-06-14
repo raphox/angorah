@@ -12,33 +12,20 @@ class UsersController < ApplicationController
   # GET /users/1
   # GET /users/1.json
   def show
-    @user_neo4j = UserNeo4j.find(@user.neo4j_uuid)
+    @user_neo4j = UserNeo4j.find(@user.neo4j_uuid) if @user.neo4j_uuid.present?
     @friends_path = {}
 
     # TODO: optimize queries to locate Users
-    @friends =
+    @friends = begin
       if params[:q].present?
-        uuids = @user_neo4j.
-          friends(:l, :r, rel_length: 5).
-          where("ANY(title IN l.titles WHERE toLower(title) CONTAINS toLower({title}))").
-          params({ title: params[:q] }).
-          pluck(:uuid)
-
-        uuids.each do |uuid|
-          @friends_path[uuid] = Neo4j::ActiveBase.current_session.
-            query("MATCH (r:UserNeo4j { uuid: '#{@user.neo4j_uuid}' }),
-              (l:UserNeo4j { uuid: '#{uuid}' }),
-              p = shortestPath((r)-[FRIEND*..15]->(l))
-              RETURN p", limit: 1).first.p.nodes.
-            map { |node| User.find_by({ neo4j_uuid: node.properties[:uuid] }) }
-        end
-
-        User.where(:neo4j_uuid.in => uuids)
-      else
+        byebug
+        uuids = @user_neo4j.friendsBySearch(params[:q]).pluck(:uuid)
+      elsif @user_neo4j.present?
         uuids = @user_neo4j.friends.pluck(:uuid)
-
-        User.where(:neo4j_uuid.in => uuids)
       end
+
+      uuids.present? ? User.where(:neo4j_uuid.in => uuids) : []
+    end
   end
 
   # GET /users/new

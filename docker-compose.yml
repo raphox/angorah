@@ -37,17 +37,15 @@ services:
   web:
     build: .
     environment:
-      MONGO_SERVER: database_mongodb
-      MONGO_PORT: 27017
-      MONGO_DATABASE: myapp_development
-      MONGO_USER: user
-      MONGO_PASSWORD: password
+      MONGODB_URI: mongodb://user:password@database_mongodb:27017/myapp_development
+      MONGODB_TEST_URI: mongodb://user:password@database_mongodb:27017/myapp_development
 
       ARANGO_SERVER: database_arangodb
       ARANGO_DATABASE: angora_development
       ARANGO_USER: ""
       ARANGO_PASSWORD: ""
 
+      NEO4J_TYPE: http
       NEO4J_URL: http://database_neo4j:7474
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     stdin_open: true
