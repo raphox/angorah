@@ -20,12 +20,11 @@ $(document).on('ready turbolinks:load', function () {
     event.preventDefault();
 
     var el = $(this);
+    el.toggleClass('is-active');
 
     $.get(el.attr('href'))
-      .done(function(data) {
-        el.toggleClass('is-active');
-      })
       .fail(function() {
+        el.toggleClass('is-active');
         alert("error");
       })
     ;
