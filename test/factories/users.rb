@@ -5,7 +5,7 @@ FactoryBot.define do
     website { Faker::Internet.unique.url }
     titles { Array.new(5) { Faker::University.name } }
     subtitles { Array.new(5) { Faker::University.name } }
-    introduction { Faker::Lorem.paragraphs }
+    introduction { Faker::Lorem.paragraphs.join("\n") }
     skip_load_website_titles { true }
   end
 end
