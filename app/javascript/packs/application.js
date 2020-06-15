@@ -29,5 +29,12 @@ $(document).on('ready turbolinks:load', function () {
         alert("error");
       })
     ;
+  });
+
+  $('.navbar-burger').click(function () {
+    var el = $(this);
+
+    el.toggleClass('is-active');
+    $(el.data('target')).toggle('is-active');
   })
 });
