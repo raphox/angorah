@@ -12,8 +12,8 @@ class WebsiteScrapper
     nokogiri = WebsiteScrapper.get(url)
 
     {
-      titles: nokogiri.search('h1').map{ |item| item.text.squish },
-      subtitles: nokogiri.search('h2').map{ |item| item.text.squish },
+      titles: nokogiri.search('h1').map { |item| item.text.squish },
+      subtitles: nokogiri.search('h2').map { |item| item.text.squish },
     }
   end
 end

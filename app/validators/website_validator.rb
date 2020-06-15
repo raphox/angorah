@@ -1,7 +1,7 @@
 class WebsiteValidator < ActiveModel::EachValidator
-  def validate_each(record, attribute, value)
+  def validate_each(record, _attribute, value)
     HTTParty.get(value, { timeout: 5 })
-  rescue => e
+  rescue StandardError => e
     record.errors[:attribute] << e.message
   end
 end

@@ -21,7 +21,7 @@
 <% if @friends.present? %>
   <div class="columns is-multiline">
     <% @friends.each do |item| %>
-      <%= render partial: 'user', locals: { user: item, path: @friends_path[item.uuid] } %>
+      <%= render partial: 'user', locals: { user: item, path: @friends_path && @friends_path[item.neo4j_uuid] } %>
     <% end %>
   </div>
 <% else %>
@@ -33,6 +33,8 @@
     var form = $("#friend-list form");
     var el = form.find("input[name='q']");
     var button = form.find("button[type='submit']");
+
+    button.data('default-text', button.text())
 
     form.submit(function (event) {
       event.preventDefault();
@@ -51,7 +53,7 @@
           alert("error");
         })
         .always(function () {
-          button.prop('disabled', false);
+          button.prop('disabled', false).text(button.data('default-text'));
         })
       ;
     })

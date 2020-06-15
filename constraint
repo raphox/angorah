@@ -1,0 +1,9 @@
+[ {
+  "property_keys" : [ "uuid" ],
+  "label" : "UserNeo4j",
+  "type" : "UNIQUENESS"
+}, {
+  "property_keys" : [ "migration_id" ],
+  "label" : "Neo4j::Migrations::SchemaMigration",
+  "type" : "UNIQUENESS"
+} ]

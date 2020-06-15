@@ -11,24 +11,25 @@ class UserNeo4j
   property :titles
   property :subtitles
   property :introduction
+  property :slug
 
   serialize :titles, Array
   serialize :subtitles, Array
 
-  attr_accessor :skip_get_website_titles
+  attr_accessor :skip_load_website_titles
 
   has_many :out, :friends, type: :FRIEND, model_class: self, labels: false, unique: true
 
-  validates :slug, exclusion: { in: ['admin', 'root'] + RouteRecognizer.initial_path_segments }, uniqueness: true
+  validates :slug, exclusion: { in: %w[admin root] + RouteRecognizer.initial_path_segments }, uniqueness: true
   validates :first_name, presence: true
   validates :website, uniqueness: true, presence: true, website: true
 
   before_validation :set_slug
 
-  after_save :get_website_titles
+  after_save :load_website_titles
 
   def set_slug
-    slug = first_name&.parameterize if slug.blank? || slug_changed?
+    self.slug = first_name&.parameterize if slug.blank? || slug_changed?
   end
 
   def full_name
@@ -46,7 +47,7 @@ class UserNeo4j
     WebsiteScrapperWorker.new.perform(uuid, self.class)
   end
 
-  def friendsBySearch(term)
+  def friends_by_search(term)
     friends_path = {}
 
     friends = as(:user).friends(:l, :r, rel_length: { max: 5 }).
@@ -56,20 +57,33 @@ class UserNeo4j
       params({ title: term })
 
     friends.each do |friend|
-      friends_path[uuid] = Neo4j::ActiveBase.current_session.
-        query("MATCH (r:UserNeo4j { uuid: '#{self.uuid}' }),
+      friends_path[friend.uuid] = Neo4j::ActiveBase.current_session.
+        query("MATCH (r:UserNeo4j { uuid: '#{uuid}' }),
           (l:UserNeo4j { uuid: '#{friend.uuid}' }),
           p = shortestPath((r)-[FRIEND*..5]->(l))
           RETURN p", limit: 1).first.p.nodes
     end
 
-    return friends, friends_path
+    [friends, friends_path]
+  end
+
+  def invite(uuid)
+    friend_a = self
+    friend_b = UserNeo4j.find(uuid)
+
+    if friend_a.friends(rel_length: 1).where({ uuid: friend_b.uuid }).present?
+      friend_a.friends.delete(friend_b)
+      friend_b.friends.delete(friend_a)
+    else
+      friend_a.friends << friend_b
+      friend_b.friends << friend_a
+    end
   end
 
   protected
 
-  def get_website_titles
-    return if skip_get_website_titles
+  def load_website_titles
+    return if skip_load_website_titles
 
     # The below line not working for now https://github.com/neo4jrb/activegraph/issues/1351
     # return unless changed_attributes.keys.include?('website')

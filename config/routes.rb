@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root to: "users#index"
+  root to: 'users#index'
 
   resources :users do
     get 'invite', on: :member, as: :invite

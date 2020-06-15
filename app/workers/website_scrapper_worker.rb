@@ -6,6 +6,6 @@ class WebsiteScrapperWorker
     user = klass.find(user_id)
     attributes = WebsiteScrapper.titles(user.website)
 
-    user.update!(attributes.merge({ skip_get_website_titles: true }))
+    user.update!(attributes.merge({ skip_load_website_titles: true }))
   end
 end

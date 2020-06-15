@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   ACTIVE_MODEL_CLASS = User # UserNeo4j
 
-  before_action :set_user, only: [:show, :friends, :edit, :update, :destroy, :invite]
+  before_action :set_user, only: %i[show friends edit update destroy invite]
 
   # GET /users
   # GET /users.json
@@ -12,13 +12,22 @@ class UsersController < ApplicationController
   # GET /users/1
   # GET /users/1.json
   def show
-    @user_neo4j = UserNeo4j.find(@user.neo4j_uuid)
-    @friends_path = {}
+    user_neo4j = UserNeo4j.find(@user.neo4j_uuid)
 
     if params[:q].present?
-      @friends, @friends_path = @user_neo4j.friendsBySearch(params[:q])
-    elsif @user_neo4j.present?
-      @friends = @user_neo4j.friends
+      friends, friends_path = user_neo4j.friends_by_search(params[:q])
+    elsif user_neo4j.present?
+      friends = user_neo4j.friends
+    end
+
+    # FIXME: Change this When use ACTIVE_MODEL_CLASS as UserNeo4j
+    @friends = User.where(:neo4j_uuid.in => friends.pluck(:uuid))
+    @friends_path = friends_path&.transform_values do |item|
+      uuids = item.map { |node| node.props[:uuid] }
+
+      # it is necessary to order after query in database to preser correct path
+      User.where(:neo4j_uuid.in => uuids).
+        to_a.sort_by { |value| uuids.index(value.neo4j_uuid) }
     end
   end
 
@@ -39,8 +48,7 @@ class UsersController < ApplicationController
   end
 
   # GET /users/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /users
   # POST /users.json
@@ -76,19 +84,12 @@ class UsersController < ApplicationController
   # GET /users/1/invite.json
   def invite
     notice = 'User was successfully invited.'
-    friend_a = UserNeo4j.find(@current_user.neo4j_uuid)
-    friend_b = UserNeo4j.find(@user.neo4j_uuid)
 
-    if friend_a.friends(rel_length: 1).where({ uuid: @user.neo4j_uuid }).present?
-      notice = 'User was successfully uninvited.'
-      friend_a.friends.delete(friend_b)
-      friend_b.friends.delete(friend_a)
-    else
-      friend_a.friends << friend_b
-      friend_b.friends << friend_a
-    end
+    neo4j = UserNeo4j.find(@current_user.neo4j_uuid)
+    neo4j.invite(@user.neo4j_uuid)
 
     respond_to do |format|
+      format.js { render json: { status: :ok, message: notice } }
       format.html { redirect_to user_path(@user), notice: notice }
       format.json { render json: { status: :ok, message: notice } }
     end

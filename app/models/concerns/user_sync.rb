@@ -9,20 +9,20 @@ module UserSync
   def save_neoj4
     return unless (attributes.keys - ['updated_at']).any?
 
-    params = attributes.slice(*%w[
-      first_name
-      last_name
-      slug
-      website
-      titles
-      subtitles
-      introduction
-    ]).merge({ 'skip_get_website_titles' => true })
+    params = attributes.slice(
+      'first_name',
+      'last_name',
+      'slug',
+      'website',
+      'titles',
+      'subtitles',
+      'introduction'
+    ).merge({ 'skip_load_website_titles' => true })
 
     if neo4j_uuid.present?
       user = UserNeo4j.find(neo4j_uuid)
       user.update(params)
-    elsif
+    else
       user = UserNeo4j.create(params)
 
       # update without callbacks
@@ -33,7 +33,11 @@ module UserSync
   def destroy_neoj4
     return unless neo4j_uuid.present?
 
-    UserNeo4j.find(neo4j_uuid).destroy rescue nil
+    begin
+      UserNeo4j.find(neo4j_uuid).destroy
+    rescue StandardError
+      nil
+    end
 
     set({ neo4j_uuid: nil })
   end

@@ -3,7 +3,11 @@ class ApplicationController < ActionController::Base
 
   def set_session_user_id
     if session[:session_user_id].present?
-      @current_user = User.find(session[:session_user_id]) rescue nil
+      @current_user = begin
+                        User.find(session[:session_user_id])
+                      rescue StandardError
+                        nil
+                      end
     end
 
     @current_user = User.first if @current_user.nil?
