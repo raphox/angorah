@@ -23,7 +23,7 @@ class UsersController < ApplicationController
     # FIXME: Change this When use ACTIVE_MODEL_CLASS as UserNeo4j
     @friends = User.where(:neo4j_uuid.in => friends.pluck(:uuid))
     @friends_path = friends_path&.transform_values do |item|
-      uuids = item.map { |node| node.props[:uuid] }
+      uuids = item.map { |node| node.props[:uuid] || node.uuid }
 
       # it is necessary to order after query in database to preser correct path
       User.where(:neo4j_uuid.in => uuids).
