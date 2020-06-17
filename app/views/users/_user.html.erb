@@ -1,7 +1,7 @@
 <div class="column is-full-mobile is-one-third-tablet is-one-quarter-widescreen">
   <div class="card bm--card-equal-height">
     <div class="card-content">
-      <%= link_to(user_path(user)) do %>
+      <%= link_to(short_path(user)) do %>
         <div class="media">
           <div class="media-left">
             <figure class="image is-48x48">
@@ -10,7 +10,7 @@
           </div>
           <div class="media-content">
             <p class="title is-4"><%= user.full_name %></p>
-            <p class="subtitle is-6">@<%= user.slug %></p>
+            <p class="subtitle is-6">@<%= user.slug %> (<%= pluralize(user.friends_count, 'friend', plural: 'friends') %>)</p>
           </div>
         </div>
       <% end %>

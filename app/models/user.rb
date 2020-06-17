@@ -33,6 +33,11 @@ class User
     (titles.to_a + subtitles.to_a).uniq
   end
 
+  def friends_count
+    user_neo4j = UserNeo4j.find(neo4j_uuid)
+    user_neo4j.friends.count
+  end
+
   def reload_titles!
     return unless persisted?
 
