@@ -54,14 +54,27 @@ class UserNeo4j
       where('ANY(title IN l.titles WHERE toLower(title) CONTAINS toLower({title})) OR
         ANY(subtitle IN l.subtitles WHERE toLower(subtitle) CONTAINS toLower({title}))').
       where('l <> user').
-      params({ title: term })
+      params({ title: term }).
+      to_a
 
+    # TODO: Use only one query to get users and shortest paths
     friends.each do |friend|
       friends_path[friend.uuid] = Neo4j::ActiveBase.current_session.
         query("MATCH (r:UserNeo4j { uuid: '#{uuid}' }),
           (l:UserNeo4j { uuid: '#{friend.uuid}' }),
           p = shortestPath((r)-[FRIEND*..5]->(l))
           RETURN p", limit: 1).first.p.nodes
+    end
+
+    # TODO: Use only queries to generate order
+    friends.sort_by! do |item|
+      total = 0
+
+      total += (friends_path[item.uuid].length - 2) * 10
+      total += item.titles.any? { titles.include?(term) } ? -10 : 0
+      total += item.subtitles.any? { |subtitle| subtitle.include?(term) } ? -5 : 0
+
+      total
     end
 
     [friends, friends_path]

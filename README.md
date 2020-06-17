@@ -10,7 +10,7 @@
 Run the below code:
 
 ```
-docker-compose run web
+docker-compose up web
 ```
 
 ## Setup

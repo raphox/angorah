@@ -13,7 +13,7 @@ class WebsiteScrapper
 
     {
       titles: nokogiri.search('h1').map { |item| item.text.squish },
-      subtitles: nokogiri.search('h2').map { |item| item.text.squish },
+      subtitles: nokogiri.search('h2, h3').map { |item| item.text.squish },
     }
   end
 end
