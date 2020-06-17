@@ -72,7 +72,6 @@ class UserNeo4j
 
       total += (friends_path[item.uuid].length - 2) * 10
       total += item.titles.any? { titles.include?(term) } ? -10 : 0
-      total += item.subtitles.any? { |subtitle| subtitle.include?(term) } ? -5 : 0
 
       total
     end

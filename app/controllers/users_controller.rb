@@ -21,13 +21,16 @@ class UsersController < ApplicationController
     end
 
     # FIXME: Change this When use ACTIVE_MODEL_CLASS as UserNeo4j
-    @friends = User.where(:neo4j_uuid.in => friends.pluck(:uuid))
+    uuids = friends.map { |node| node.props[:uuid] || node.uuid }
+    @friends = User.where(:neo4j_uuid.in => friends.pluck(:uuid)).
+      to_a.sort_by { |value| uuids.index(value.neo4j_uuid) } # preserving order
+
     @friends_path = friends_path&.transform_values do |item|
       uuids = item.map { |node| node.props[:uuid] || node.uuid }
 
       # it is necessary to order after query in database to preser correct path
       User.where(:neo4j_uuid.in => uuids).
-        to_a.sort_by { |value| uuids.index(value.neo4j_uuid) }
+        to_a.sort_by { |value| uuids.index(value.neo4j_uuid) } # preserving order
     end
   end
 
