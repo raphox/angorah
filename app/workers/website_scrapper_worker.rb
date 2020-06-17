@@ -1,6 +1,6 @@
 require 'website_scrapper'
 
-# TODO: implement worker with sidekiq
+# TODO: Implement worker with sidekiq
 class WebsiteScrapperWorker
   def perform(user_id, klass = User)
     user = klass.find(user_id)
