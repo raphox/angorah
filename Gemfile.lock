@@ -166,12 +166,12 @@ GEM
       net_tcp_client (>= 2.0.1)
       typhoeus (>= 1.1.2)
     net_tcp_client (2.2.0)
-    nio4r (2.5.2)
+    nio4r (2.5.8)
     nokogiri (1.10.9)
       mini_portile2 (~> 2.4.0)
     orm_adapter (0.5.0)
     public_suffix (4.0.5)
-    puma (4.3.5)
+    puma (4.3.11)
       nio4r (~> 2.0)
     rack (2.2.2)
     rack-proxy (0.6.5)
@@ -286,7 +286,7 @@ DEPENDENCIES
   mongoid (~> 7.0.5)
   mongoid-slug
   neo4j
-  puma (~> 4.1)
+  puma (~> 4.3)
   rails (~> 6.0.3, >= 6.0.3.1)
   sass-rails (>= 6)
   selenium-webdriver
